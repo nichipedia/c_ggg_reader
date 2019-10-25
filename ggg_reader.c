@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "ggg_reader.h"
 
 float *read_GGG_File(char *file, int resolution) {
     // Need code to parse the file name and say HEY this is a valid ggg file....OR even dynamically read the correct resolution. Will not be to hard....just need to implement correctly...
@@ -27,7 +28,51 @@ float *read_GGG_File(char *file, int resolution) {
     return pdata;
 }
 
-int[] getGridCoordinates(float bbox[], int resolution) {
+float* getLatLonCoordinate(int r, int c, int resolution) {
+    int nx;
+    int ny;
+    float delta;
+    if (resolution == TWO_MINUTE_RESOLUTION) {
+        if (r < 0 || r >= 5400) {
+            fprintf(stderr, "\nRow %d out of bounds [0, 5400)", r);
+            exit(0);
+        }
+        if (c < 0 || c >= 10800) {
+            fprintf(stderr, "\nCol %d out of bounds [0, 10800)", c);
+            exit(0);
+        }
+        nx = 10800;
+        ny = 5400;
+        delta = 2.0
+    } else {
+        fprintf(stderr, "\nResolution %d not yet supported...Check header for supported resos!\n", resolution);
+        exit(0);
+    }
+    float lat = (r * delta) - 89.99f;
+    float lon = (c * delta) - 179.99f;
+    float *coords = malloc(2 * sizeof(float));
+    coords[0] = lon;
+    coords[1] = lat;
+    return coords;
+}
+
+int* getGridResolution(int resolution) {
+    int x;
+    int y;
+    if (resolution == TWO_MINUTE_RESOLUTION) {
+        x = 10800;
+        y = 5400;
+    } else {
+        fprintf(stderr, "\n Resolution not supported!\n");
+        exit(0);
+    }
+    int *gridResolutions = malloc(2*sizeof(int));
+    gridResolutions[0] = x;
+    gridResolutions[1] = y;
+    return gridResolutions;
+}
+
+int* getGridCoordinates(float bbox[], int resolution) {
     size_t length = sizeof(bbox);
     if (length != 16) {
         fprintf(stderr, "\n BBOX should be four points, Minx, Miny, Maxx, Maxy...\n");
@@ -72,11 +117,15 @@ int[] getGridCoordinates(float bbox[], int resolution) {
     int maxx = (int) ((maxlon+180.0f)/dx);
     int miny = (int) ((minlat+90.0f)/dy);   
     int maxy = (int) ((maxlat+90.0f)/dy);   
-    int coords[4] = {minx, miny, maxx, maxy};
+    int *coords = malloc(4*sizeof(int));
+    coords[0] = minx;
+    coords[1] = miny;
+    coords[2] = maxx;
+    coords[3] = maxy;
     return coords;
 }
 
-int[] getGridCoordinate(float lat, float lon, int resolution) {
+int* getGridCoordinate(float lat, float lon, int resolution) {
     if (lat < -90.0f || lat > 90.0f) {
         fprintf(stderr, "\n Latitude %f is not within the correct range!!\n", lat);
         exit(0);
@@ -102,14 +151,30 @@ int[] getGridCoordinate(float lat, float lon, int resolution) {
     }
     int x = (int) ((lon+180.0f)/dx);
     int y = (int) ((lat+90.0f)/dy);
-    int coord[2] = {x, y};
+    int *coord = malloc(2*sizeof(int));
+    coord[0] = x;
+    coord[1] = y;
     return coord;
 }
 
 
 float readFloat(float *data, int r, int c, int resolution) {
-    // Prob need some code to say HEY this is way out of bounds...
-    float value = *(data + r*10800 + c);
+    int x;
+    if (resolution == TWO_MINUTE_RESOLUTION) {
+        if (r < 0 || r >= 5400) {
+            fprintf(stderr, "\nRow %d out of bounds [0, 5400)", r);
+            exit(0);
+        }
+        if (c < 0 || c >= 10800) {
+            fprintf(stderr, "\nCol %d out of bounds [0, 10800)", c);
+            exit(0);
+        }
+        x = 10800;
+    } else {
+        fprintf(stderr, "\nResolution %d not yet supported...Check header for supported resos!\n", resolution);
+        exit(0);
+    }
+    float value = *(data + r*x + c);
     return value;
 }
 
