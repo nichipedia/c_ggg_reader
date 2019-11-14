@@ -48,8 +48,8 @@ float* getLatLonCoordinate(int r, int c, int resolution) {
         fprintf(stderr, "\nResolution %d not yet supported...Check header for supported resos!\n", resolution);
         exit(0);
     }
-    float lat = (r * delta) - 89.5f;
-    float lon = (c * delta) - 179.5f;
+    float lat = (r * delta) - (90.0f - (delta/2));
+    float lon = (c * delta) - (180.0f - (delta/2));
     float *coords = malloc(2 * sizeof(float));
     coords[0] = lon;
     coords[1] = lat;
