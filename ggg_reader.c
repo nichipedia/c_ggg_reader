@@ -43,7 +43,7 @@ float* getLatLonCoordinate(int r, int c, int resolution) {
         }
         nx = 10800;
         ny = 5400;
-        delta = 2.0
+        delta = 2.0;
     } else {
         fprintf(stderr, "\nResolution %d not yet supported...Check header for supported resos!\n", resolution);
         exit(0);
@@ -179,13 +179,13 @@ float readFloat(float *data, int r, int c, int resolution) {
 }
 
 // Main here for testing purposes!!
-int main() {
-    float *data = read_GGG_File("/home/nmoran/data/2m/GL_ELEVATION_M_ASL_ETOPO2v2.2m.ggg");
+int test() {
+    float *data = read_GGG_File("/home/nmoran/data/2m/GL_ELEVATION_M_ASL_ETOPO2v2.2m.ggg", 2);
     int i;
     int j;
     for (i = 0; i < 5400; i++) {
         for (j = 0; j < 10800; j++) {
-            printf("Value: %f\n", readFloat(data, i, j));
+            printf("Value: %f\n", readFloat(data, i, j, 2));
         }
     }
     free(data);
