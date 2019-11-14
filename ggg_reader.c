@@ -18,8 +18,8 @@ float *read_GGG_File(char *file, int resolution) {
     }
     pFile = fopen(file, "rb");
     float *pdata;
-    pdata = (float*) malloc (4*nx*ny);
-    long result = fread(pdata, 4, (nx*ny), pFile);
+    pdata = (float*) malloc (sizeof(float)*nx*ny);
+    long result = fread(pdata, sizeof(float), (nx*ny), pFile);
     if (result == 0) {
         fprintf(stderr, "\n Error reading UNISIPS file...Try again :P\n");
         exit(0);
@@ -43,13 +43,13 @@ float* getLatLonCoordinate(int r, int c, int resolution) {
         }
         nx = 10800;
         ny = 5400;
-        delta = 2.0;
+        delta = 2.0/60.0;
     } else {
         fprintf(stderr, "\nResolution %d not yet supported...Check header for supported resos!\n", resolution);
         exit(0);
     }
-    float lat = (r * delta) - 89.99f;
-    float lon = (c * delta) - 179.99f;
+    float lat = (r * delta) - 89.5f;
+    float lon = (c * delta) - 179.5f;
     float *coords = malloc(2 * sizeof(float));
     coords[0] = lon;
     coords[1] = lat;
@@ -131,7 +131,7 @@ int* getGridCoordinate(float lat, float lon, int resolution) {
         exit(0);
     }
     if (lon < -180.0f || lon > 180.0f) {
-        fprintf(stderr, "\n Longitude %f is not within the correct range!!\n", lat);
+        fprintf(stderr, "\n Longitude %f is not within the correct range!!\n", lon);
         exit(0);
     }
     float dx = 0;
