@@ -17,15 +17,8 @@ void *read_GGG_File(char *file, int resolution) {
         exit(0);
     }
     pFile = fopen(file, "rb");
-    float *pdata;
-    pdata = (float*) malloc (sizeof(float)*nx*ny);
-    long result = fread(pdata, sizeof(float), (nx*ny), pFile);
-    if (result == 0) {
-        fprintf(stderr, "\n Error reading UNISIPS file...Try again :P\n");
-        exit(0);
-    }
-    fclose(pFile);
-    return pdata;
+    //long result = fread(pdata, sizeof(float), (nx*ny), pFile);
+    return pFile;
 }
 
 float* getLatLonCoordinate(int r, int c, int resolution) {
@@ -158,7 +151,7 @@ int* getGridCoordinate(float lat, float lon, int resolution) {
 }
 
 
-float readFloat(void *data, int r, int c, int resolution) {
+float readFloat(void *fp, int r, int c, int resolution) {
     int x;
     if (resolution == TWO_MINUTE_RESOLUTION) {
         if (r < 0 || r >= 5400) {
@@ -174,18 +167,23 @@ float readFloat(void *data, int r, int c, int resolution) {
         fprintf(stderr, "\nResolution %d not yet supported...Check header for supported resos!\n", resolution);
         exit(0);
     }
-    float value = *(data + r*x + c);
+    float value;
+    if (fseek(fp, r*x + c, SEEK_SET) != 0) {
+        fprintf(stderr, "\nSeeking through file pointer had a issue! \n", resolution);
+        exit(0);
+    }
+    long result = fread(&value, sizeof(float), 1, fp);
     return value;
 }
 
 // Main here for testing purposes!!
 int test() {
-    float *data = read_GGG_File("/home/nmoran/data/2m/GL_ELEVATION_M_ASL_ETOPO2v2.2m.ggg", 2);
+    FILE *data = read_GGG_File("/work/morann/GL_ELEVATION_M_ASL_ETOPO2v2.2m.ggg", 2);
     int i;
     int j;
     for (i = 0; i < 5400; i++) {
         for (j = 0; j < 10800; j++) {
-            printf("Value: %f\n", readFloat(data, i, j, 2));
+            printf("Value: %f\n", readFloat(data, i, j, TWO_MINUTE_RESOLUTION));
         }
     }
     free(data);
